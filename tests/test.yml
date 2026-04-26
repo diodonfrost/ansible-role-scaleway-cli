@@ -1,4 +1,4 @@
 ---
 - hosts: localhost
   roles:
-    - diodonfrost.scaleway_cli
+    - diodonfrost.scaleway-cli
