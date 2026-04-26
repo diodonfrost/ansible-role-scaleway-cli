@@ -1,0 +1,14 @@
+---
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+platforms:
+  - name: scaleway-cli-freebsd
+    box: generic/freebsd14
+    memory: 4096
+    cpus: 2
+provisioner:
+  name: ansible
+verifier:
+  name: ansible

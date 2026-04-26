@@ -1,0 +1,14 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Windows | Scaleway CLI should be functional
+      ansible.windows.win_command: scw version
+      register: scaleway_cli_result
+      changed_when: false
+
+    - name: Windows | Verify commands outputs
+      ansible.builtin.assert:
+        that:
+          - scaleway_cli_result.rc == 0
+        success_msg: "All tests passed"

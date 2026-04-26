@@ -1,0 +1,14 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: FreeBSD | Scaleway CLI should be functional
+      ansible.builtin.command: scw version
+      register: scaleway_cli_result
+      changed_when: false
+
+    - name: FreeBSD | Verify commands outputs
+      ansible.builtin.assert:
+        that:
+          - scaleway_cli_result.rc == 0
+        success_msg: "All tests passed"
