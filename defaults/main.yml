@@ -1,0 +1,23 @@
+---
+# defaults file for ansible-role-scaleway-cli
+
+# Define scaleway-cli version to install
+# Possible values: https://api.github.com/repos/scaleway/scaleway-cli/releases
+# Default: latest
+scaleway_cli_version: latest
+
+# Define where to install scaleway-cli binary
+# Default: use local system path defined in Ansible vars/*.yml
+scaleway_cli_path: "{{ _scaleway_cli_default_path }}"
+
+# Define the URL of the scaleway-cli binary to download
+# Default: use the URL defined in Ansible vars/*.yml
+scaleway_cli_pkg_url: "{{ _scaleway_cli_default_pkg_url }}"
+
+# Enable SHA256 checksum verification of the downloaded binary
+# Default: true
+scaleway_cli_checksum_verify: true
+
+# Define the URL of the SHA256SUMS file used to verify the downloaded binary
+# Default: use the URL defined in Ansible vars/main.yml
+scaleway_cli_checksum_url: "{{ _scaleway_cli_default_checksum_url }}"

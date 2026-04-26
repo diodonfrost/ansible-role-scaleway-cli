@@ -1,0 +1,42 @@
+---
+# tasks file for install Scaleway CLI on Linux system
+
+- name: Linux/Unix | Get the latest published full release for the repository
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/scaleway/scaleway-cli/releases/latest
+    return_content: yes
+    headers:
+      Accept: application/vnd.github.v3+json
+      User-Agent: Ansible
+  register: scaleway_cli_index
+  check_mode: false
+  retries: 3
+  delay: 5
+  until: scaleway_cli_index is success
+  when: scaleway_cli_version == "latest"
+
+- name: Linux/Unix | Filter the latest Scaleway CLI version
+  ansible.builtin.set_fact:
+    _scaleway_cli_version_to_install: "{{ (scaleway_cli_index.content | from_json).tag_name }}"
+  when: scaleway_cli_version == "latest"
+
+- name: Linux/Unix | Use the specified Scaleway CLI version when latest var is not define
+  ansible.builtin.set_fact:
+    _scaleway_cli_version_to_install: "{{ scaleway_cli_version }}"
+  when: scaleway_cli_version != "latest"
+
+# This task avoids downloading Scaleway CLI every time
+- name: Linux/Unix | Check if Scaleway CLI is present with the right version
+  ansible.builtin.command: "{{ scaleway_cli_path }}/scw version"
+  register: scaleway_cli_installed_version
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+
+- name: Linux/Unix | Install Scaleway CLI
+  ansible.builtin.get_url:
+    url: "{{ scaleway_cli_pkg_url }}"
+    dest: "{{ scaleway_cli_path }}/scw"
+    checksum: "{{ ('sha256:' + scaleway_cli_checksum_url) if scaleway_cli_checksum_verify else omit }}"
+    mode: '0755'
+  when: _scaleway_cli_version_to_install not in (scaleway_cli_installed_version.stdout | default('empty'))

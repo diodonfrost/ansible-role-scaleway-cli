@@ -1,0 +1,4 @@
+---
+# vars file for scaleway-cli in Mac osx system
+_scaleway_cli_default_pkg_url: "https://github.com/scaleway/scaleway-cli/releases/download/{{ _scaleway_cli_version_to_install }}/scaleway-cli_{{ _scaleway_cli_version_to_install | replace('v', '') }}_darwin_{{ _scaleway_cli_arch_map[ansible_facts['architecture']] }}"
+_scaleway_cli_default_path: /usr/local/bin

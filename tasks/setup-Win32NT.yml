@@ -1,0 +1,48 @@
+---
+# tasks file for install Scaleway CLI on Windows system
+
+- name: Windows | Find all versions of Scaleway CLI
+  ansible.windows.win_uri:
+    url: https://api.github.com/repos/scaleway/scaleway-cli/releases/latest
+    return_content: true
+  register: scaleway_cli_index
+  check_mode: false
+  retries: 3
+  delay: 5
+  until: scaleway_cli_index is success
+  when: scaleway_cli_version == "latest"
+
+- name: Windows | Finds the latest Scaleway CLI version when latest var is define
+  ansible.builtin.set_fact:
+    _scaleway_cli_version_to_install: "{{ (scaleway_cli_index.content | from_json).tag_name }}"
+  when: scaleway_cli_version == "latest"
+
+- name: Windows | Use the specified Scaleway CLI version when latest var is not define
+  ansible.builtin.set_fact:
+    _scaleway_cli_version_to_install: "{{ scaleway_cli_version }}"
+  when: scaleway_cli_version != "latest"
+
+# This task avoids downloading Scaleway CLI every time
+- name: Windows | Check if Scaleway CLI is present on Windows with the right version
+  ansible.windows.win_command: "scw.exe version"
+  register: scaleway_cli_installed_version
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+
+- name: Windows | Create Scaleway CLI folder
+  ansible.windows.win_file:
+    path: "{{ scaleway_cli_path }}"
+    state: directory
+
+- name: Windows | Install Scaleway CLI
+  ansible.windows.win_get_url:
+    url: "{{ scaleway_cli_pkg_url }}"
+    dest: "{{ scaleway_cli_path }}\\scw.exe"
+    checksum_url: "{{ scaleway_cli_checksum_url if scaleway_cli_checksum_verify else omit }}"
+    checksum_algorithm: "{{ 'sha256' if scaleway_cli_checksum_verify else omit }}"
+  when: _scaleway_cli_version_to_install not in (scaleway_cli_installed_version.stdout | default('empty'))
+
+- name: Windows | Add Scaleway CLI to PATH
+  ansible.windows.win_path:
+    elements: "{{ scaleway_cli_path }}"
